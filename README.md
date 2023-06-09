@@ -26,7 +26,7 @@ The Bukitu backend is designed to support the operations of the Bukitu platform,
    ```
 3. Install dependencies:
    ```sh
-   # Example for a Python project
+   # Example for a Node.JS Project
    npm install
    ```
 4. Set up environment variables:
@@ -38,7 +38,7 @@ The Bukitu backend is designed to support the operations of the Bukitu platform,
 
 5. Start the development server:
    ```sh
-   # Example for a Django project
+   # Example for a Node.JS project
    npm start
    ```
 
@@ -51,6 +51,6 @@ The backend exposes RESTful APIs for interacting with Bukitu.
 To run tests, use the following command:
 
 ```sh
-# Example for a Python project with Django
+# Example for a Node.JS project
 npm test
 ```
