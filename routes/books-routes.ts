@@ -1,4 +1,5 @@
-const express = require("express");
+import { express } from "../app";
+
 const booksController = require("../controllers/books-controller");
 
 const router = express.Router();
