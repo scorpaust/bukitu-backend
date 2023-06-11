@@ -2,11 +2,21 @@ export const express = require("express");
 
 export const bodyParser = require("body-parser");
 
+const HttpError = require("./models/http-error");
+
 const booksRoutes = require("./routes/books-routes");
 
 const app = express();
 
+app.use(bodyParser.json());
+
 app.use("/api/livros", booksRoutes);
+
+app.use((req, res, next) => {
+  const error = new HttpError("Ligação não encontrada", 404);
+
+  throw error;
+});
 
 app.use((error, req, res, next) => {
   if (res.headerSent) {

@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from "uuid";
+
 const httpError = require("../models/http-error");
 
-const dummy_books = [
+let dummy_books = [
   {
     id: "b1",
     isbn: "9781501137259",
@@ -58,7 +60,7 @@ const getBooksByUserId = (req, res, next) => {
     return b.userIds.includes(userId);
   });
 
-  if (books.length == 0) {
+  if (!books || books.length == 0) {
     return next(
       new httpError(
         "Não foi encontrado nenhum livro para o utilizador " + userId,
@@ -70,6 +72,53 @@ const getBooksByUserId = (req, res, next) => {
   res.json({ books });
 };
 
+const createBook = (req, res, next) => {
+  const { isbn, title, summary, image, author } = req.body;
+  const createdBook = {
+    id: uuidv4(),
+    isbn: isbn,
+    title: title,
+    summary: summary,
+    image: image,
+    author: author,
+    userIds: ["u1"],
+  };
+
+  dummy_books.push(createdBook);
+
+  res.status(201).json({ book: createdBook });
+};
+
+const updateBookById = (req, res, next) => {
+  const { title, summary } = req.body;
+  const bookId = req.params.lid;
+
+  const updatedBook = { ...dummy_books.find((b) => b.id === bookId) };
+
+  const bookIndex = dummy_books.findIndex((b) => b.id === bookId);
+
+  updatedBook.title = title;
+
+  updatedBook.summary = summary;
+
+  dummy_books[bookIndex] = updatedBook;
+
+  res.status(200).json({ book: updatedBook });
+};
+
+const deleteBookById = (req, res, next) => {
+  const bookId = req.params.lid;
+  dummy_books = dummy_books.filter((b) => b.id !== bookId);
+
+  res.status(200).json({ message: "Livro eliminado da sua coleção." });
+};
+
 exports.getBookById = getBookById;
 
 exports.getBooksByUserId = getBooksByUserId;
+
+exports.createBook = createBook;
+
+exports.updateBookById = updateBookById;
+
+exports.deleteBookById = deleteBookById;
