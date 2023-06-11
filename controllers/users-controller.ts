@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { validationResult } from "../app";
 
 const HttpError = require("../models/http-error");
 
@@ -16,6 +17,15 @@ const getUsers = (req, res, next) => {
 };
 
 const signUp = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    throw new HttpError(
+      "Dados inválidos. Verifique se preencheu corretamente todos os campos do formulário.",
+      422
+    );
+  }
+
   const { name, email, password } = req.body;
 
   const hasUser = dummy_users.find((u) => u.email === email);

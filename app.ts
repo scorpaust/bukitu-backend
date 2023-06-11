@@ -2,6 +2,8 @@ export const express = require("express");
 
 export const bodyParser = require("body-parser");
 
+export const { check, validationResult } = require("express-validator");
+
 const HttpError = require("./models/http-error");
 
 const booksRoutes = require("./routes/books-routes");

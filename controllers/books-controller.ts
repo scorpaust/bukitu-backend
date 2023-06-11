@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
+import { validationResult } from "../app";
 
-const httpError = require("../models/http-error");
+const HttpError = require("../models/http-error");
 
 let dummy_books = [
   {
@@ -45,7 +46,7 @@ const getBookById = (req, res, next) => {
   });
 
   if (!book) {
-    throw new httpError(
+    throw new HttpError(
       "Não foi encontrado nenhum livro com id " + bookId,
       404
     );
@@ -62,7 +63,7 @@ const getBooksByUserId = (req, res, next) => {
 
   if (!books || books.length == 0) {
     return next(
-      new httpError(
+      new HttpError(
         "Não foi encontrado nenhum livro para o utilizador " + userId,
         404
       )
@@ -73,6 +74,15 @@ const getBooksByUserId = (req, res, next) => {
 };
 
 const createBook = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    throw new HttpError(
+      "Dados inválidos. Verifique se preencheu corretamente todos os campos do formulário.",
+      422
+    );
+  }
+
   const { isbn, title, summary, image, author } = req.body;
   const createdBook = {
     id: uuidv4(),
@@ -90,6 +100,15 @@ const createBook = (req, res, next) => {
 };
 
 const updateBookById = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    throw new HttpError(
+      "Dados inválidos. Verifique se preencheu corretamente todos os campos do formulário.",
+      422
+    );
+  }
+
   const { title, summary } = req.body;
   const bookId = req.params.lid;
 
@@ -108,6 +127,14 @@ const updateBookById = (req, res, next) => {
 
 const deleteBookById = (req, res, next) => {
   const bookId = req.params.lid;
+
+  if (!dummy_books.find((b) => b.id === bookId)) {
+    throw new HttpError(
+      "Não foi encontrado nenhum livro com id " + bookId + ".",
+      404
+    );
+  }
+
   dummy_books = dummy_books.filter((b) => b.id !== bookId);
 
   res.status(200).json({ message: "Livro eliminado da sua coleção." });
