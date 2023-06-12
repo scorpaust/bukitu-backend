@@ -3,6 +3,8 @@ import { validationResult } from "../app";
 
 const HttpError = require("../models/http-error");
 
+const Book = require("../models/book");
+
 let dummy_books = [
   {
     id: "b1",
@@ -73,7 +75,7 @@ const getBooksByUserId = (req, res, next) => {
   res.json({ books });
 };
 
-const createBook = (req, res, next) => {
+const createBook = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -83,18 +85,22 @@ const createBook = (req, res, next) => {
     );
   }
 
-  const { isbn, title, summary, image, author } = req.body;
-  const createdBook = {
-    id: uuidv4(),
-    isbn: isbn,
-    title: title,
-    summary: summary,
-    image: image,
-    author: author,
+  const { title, summary, image, authors } = req.body;
+  const createdBook = new Book({
+    title,
+    summary,
+    image,
+    authors,
     userIds: ["u1"],
-  };
+  });
 
-  dummy_books.push(createdBook);
+  try {
+    await createdBook.save();
+  } catch (err) {
+    const error = new HttpError("Falhou a criação de um novo livro.", 500);
+
+    return next(error);
+  }
 
   res.status(201).json({ book: createdBook });
 };

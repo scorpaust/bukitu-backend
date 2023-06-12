@@ -15,7 +15,7 @@ router.post(
     check("title").not().isEmpty(),
     check("summary").isLength({ min: 5 }),
     check("image").not().isEmpty(),
-    check("author").not().isEmpty(),
+    check("authors").not().isEmpty(),
   ],
   booksController.createBook
 );
