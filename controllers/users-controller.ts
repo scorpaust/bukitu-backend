@@ -3,6 +3,8 @@ import { validationResult } from "../app";
 
 const HttpError = require("../models/http-error");
 
+const User = require("../models/user");
+
 const dummy_users = [
   {
     id: "u1",
@@ -12,50 +14,96 @@ const dummy_users = [
   },
 ];
 
-const getUsers = (req, res, next) => {
-  res.status(200).json({ users: dummy_users });
+const getUsers = async (req, res, next) => {
+  let users;
+
+  try {
+    users = await User.find({}, "-password");
+  } catch (err) {
+    const error = new HttpError(
+      "Falha na listagem de utilizadores. Tente, por favor, mais tarde.",
+      500
+    );
+
+    return next(error);
+  }
+
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
-const signUp = (req, res, next) => {
+const signUp = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    throw new HttpError(
-      "Dados inválidos. Verifique se preencheu corretamente todos os campos do formulário.",
-      422
+    return next(
+      new HttpError(
+        "Dados inválidos. Verifique se preencheu corretamente todos os campos do formulário.",
+        422
+      )
     );
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, image, password } = req.body;
 
-  const hasUser = dummy_users.find((u) => u.email === email);
+  let existingUser;
 
-  if (hasUser) {
-    throw new HttpError(
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError("O registo falhou. Tente mais tarde.", 500);
+
+    return next(error);
+  }
+
+  if (existingUser) {
+    const error = new HttpError(
       "Não foi possível registar utilizador. E-mail já registado na nossa base de dados.",
       422
     );
+
+    return next(error);
   }
 
-  const createdUser = {
-    id: uuidv4(),
-    name: name,
-    email: email,
-    password: password,
-  };
+  const createdUser = new User({
+    name,
+    email,
+    image,
+    password,
+  });
 
-  dummy_users.push(createdUser);
+  try {
+    await createdUser.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Não foi possível proceder ao registo de utilizador na base de dados. Tente, por favor, mais tarde.",
+      500
+    );
+    return next(error);
+  }
 
-  res.status(201).json({ user: createdUser });
+  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const identifiedUser = dummy_users.find((u) => u.email === email);
+  let existingUser;
 
-  if (!identifiedUser || identifiedUser.password !== password) {
-    throw new HttpError("Credenciais inválidas.", 401);
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError("O registo falhou. Tente mais tarde.", 500);
+
+    return next(error);
+  }
+
+  if (!existingUser || existingUser.password !== password) {
+    const error = new HttpError(
+      "Credenciais inválidas. Falha na autenticação.",
+      401
+    );
+
+    return next(error);
   }
 
   res.json({ message: "Autenticação bem sucedida!" });
