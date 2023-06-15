@@ -5,15 +5,6 @@ const HttpError = require("../models/http-error");
 
 const User = require("../models/user");
 
-const dummy_users = [
-  {
-    id: "u1",
-    name: "Dinis Costa",
-    email: "test@test.com",
-    password: "1234",
-  },
-];
-
 const getUsers = async (req, res, next) => {
   let users;
 

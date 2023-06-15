@@ -180,7 +180,7 @@ const deleteBookById = async (req, res, next) => {
   let book;
 
   try {
-    book = await Book.findById(bookId);
+    book = await Book.findById(bookId).populate("userIds");
   } catch (err) {
     const error = new HttpError(
       "Não foi possível eliminar o livro com id " + bookId,
@@ -189,8 +189,33 @@ const deleteBookById = async (req, res, next) => {
     return next(error);
   }
 
+  if (!book) {
+    const error = new HttpError(
+      "Não foi possível encontrar um livro com id " + bookId,
+      404
+    );
+
+    return next(error);
+  }
+
   try {
-    await book.deleteOne({ id: bookId });
+    const sess = await mongoose.startSession();
+
+    sess.startTransaction();
+
+    book.userIds.forEach(async (id) => {
+      let user = await User.findById(id);
+
+      user.books.pull(book);
+
+      await user.save();
+
+      book.userIds.pull(user);
+    });
+
+    await book.deleteOne({ session: sess });
+
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(
       "Não foi possível remover da base de dados o livro com id " + bookId,
