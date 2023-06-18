@@ -141,7 +141,7 @@ const updateBookById = async (req, res, next) => {
     );
   }
 
-  const { title, summary } = req.body;
+  const { title, summary, authors } = req.body;
   const bookId = req.params.lid;
 
   let book;
@@ -160,6 +160,8 @@ const updateBookById = async (req, res, next) => {
   book.title = title;
 
   book.summary = summary;
+
+  book.authors = authors;
 
   try {
     await book.save();

@@ -14,7 +14,6 @@ router.post(
   [
     check("title").not().isEmpty(),
     check("summary").isLength({ min: 5 }),
-    check("image").not().isEmpty(),
     check("authors").not().isEmpty(),
   ],
   booksController.createBook
@@ -22,7 +21,11 @@ router.post(
 
 router.patch(
   "/:lid",
-  [check("title").not().isEmpty(), check("summary").isLength({ min: 5 })],
+  [
+    check("title").not().isEmpty(),
+    check("summary").isLength({ min: 5 }),
+    check("authors").not().isEmpty(),
+  ],
   booksController.updateBookById
 );
 

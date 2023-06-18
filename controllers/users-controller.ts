@@ -34,7 +34,7 @@ const signUp = async (req, res, next) => {
     );
   }
 
-  const { name, email, image, password } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser;
 
@@ -58,7 +58,7 @@ const signUp = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image,
+    image: "image.png",
     password,
   });
 
@@ -97,7 +97,10 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ message: "Autenticação bem sucedida!" });
+  res.json({
+    message: "Autenticação bem sucedida!",
+    user: existingUser.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;
