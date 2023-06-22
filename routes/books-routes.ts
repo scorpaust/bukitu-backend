@@ -5,12 +5,15 @@ const booksController = require("../controllers/books-controller");
 
 const router = express.Router();
 
+const fileUpload = require("../middleware/file-upload");
+
 router.get("/:lid", booksController.getBookById);
 
 router.get("/utilizador/:uid", booksController.getBooksByUserId);
 
 router.post(
   "/",
+  fileUpload.single("image"),
   [
     check("title").not().isEmpty(),
     check("summary").isLength({ min: 5 }),

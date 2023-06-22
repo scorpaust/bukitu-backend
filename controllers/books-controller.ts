@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { mongoose, validationResult } from "../app";
+const fs = require("fs");
 
 const HttpError = require("../models/http-error");
 
@@ -78,11 +79,12 @@ const createBook = async (req, res, next) => {
     );
   }
 
-  const { title, summary, image, authors, userId } = req.body;
+  const { title, summary, authors, userId } = req.body;
+
   const createdBook = new Book({
     title,
     summary,
-    image,
+    image: req.file.path,
     authors,
     userIds: [userId],
   });
@@ -200,6 +202,8 @@ const deleteBookById = async (req, res, next) => {
     return next(error);
   }
 
+  const imagePath = book.image;
+
   try {
     const sess = await mongoose.startSession();
 
@@ -225,6 +229,10 @@ const deleteBookById = async (req, res, next) => {
     );
     return next(error);
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.error(err);
+  });
 
   res.status(200).json({ message: "Livro eliminado da sua coleção." });
 };
