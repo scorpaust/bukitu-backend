@@ -7,9 +7,13 @@ const router = express.Router();
 
 const fileUpload = require("../middleware/file-upload");
 
+const checkAuth = require("../middleware/check-auth");
+
 router.get("/:lid", booksController.getBookById);
 
 router.get("/utilizador/:uid", booksController.getBooksByUserId);
+
+router.use(checkAuth);
 
 router.post(
   "/",
