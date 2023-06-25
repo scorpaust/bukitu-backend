@@ -79,20 +79,20 @@ const createBook = async (req, res, next) => {
     );
   }
 
-  const { title, summary, authors, userId } = req.body;
+  const { title, summary, authors } = req.body;
 
   const createdBook = new Book({
     title,
     summary,
     image: req.file.path,
     authors,
-    userIds: [userId],
+    userIds: [req.userData.userId],
   });
 
   let user;
 
   try {
-    user = await User.findById({ _id: userId });
+    user = await User.findById({ _id: req.userData.userId });
   } catch (err) {
     const error = new HttpError("Falha na criação de livro.", 500);
 
@@ -101,7 +101,7 @@ const createBook = async (req, res, next) => {
 
   if (!user) {
     const error = new HttpError(
-      "Não foi encontrado utilizador com id " + userId,
+      "Não foi encontrado utilizador com id " + req.userData.userId,
       404
     );
 
@@ -154,6 +154,15 @@ const updateBookById = async (req, res, next) => {
     const error = new HttpError(
       "Não foi possível atualizar o livro com id " + bookId,
       500
+    );
+
+    return next(error);
+  }
+
+  if (!book.userIds.includes(req.userData.userId)) {
+    const error = new HttpError(
+      "Sem autorização para editar o livro com id " + bookId,
+      401
     );
 
     return next(error);

@@ -176,11 +176,9 @@ const login = async (req, res, next) => {
 
   res.json({
     message: "Autenticação bem sucedida!",
-    user: existingUser.toObject({
-      userId: existingUser.id,
-      email: existingUser.email,
-      token: token,
-    }),
+    userId: existingUser.id,
+    email: existingUser.email,
+    token: token,
   });
 };
 
